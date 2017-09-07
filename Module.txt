@@ -11,3 +11,4 @@ Features:
         Name: Analytics
         Category: Analytics
         Description: Adds analytics based on user page views.
+        Dependencies: Orchard.Widgets

@@ -1,0 +1,7 @@
+﻿<Placement>
+    <!-- available display shapes -->
+    <!--
+        Parts_Analytics
+    -->
+  <Place Parts_Analytics="Content:after"/>
+</Placement>
