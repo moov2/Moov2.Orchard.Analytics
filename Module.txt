@@ -1,0 +1,13 @@
+﻿Name: Moov2.Orchard.Analytics
+AntiForgery: enabled
+Author: Moov2
+Website: https://github.com/moov2/Moov2.Orchard.Analytics
+Version: 0.1
+OrchardVersion: 1.10.2
+Category: Analytics
+Description: Adds analytics based on user page views
+Features:
+    Moov2.Orchard.Analytics:
+        Name: Analytics
+        Category: Analytics
+        Description: Adds analytics based on user page views.
