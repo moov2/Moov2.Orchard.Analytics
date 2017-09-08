@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "inputs": [ "Assets/Js/analytics.js" ],
+    "output": "Scripts/analytics.js"
+  },
+  {
+    "inputs": [ "Assets/Less/analytics.less" ],
+    "output": "Styles/analytics.css"
+  }
+]

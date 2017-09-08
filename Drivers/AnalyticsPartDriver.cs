@@ -5,11 +5,13 @@ namespace Moov2.Orchard.Analytics.Drivers
 {
     public class AnalyticsPartDriver : ContentPartDriver<AnalyticsPart>
     {
-        #region Overrides
+        #region Driver
+        #region Display
         protected override DriverResult Display(AnalyticsPart part, string displayType, dynamic shapeHelper)
         {
             return ContentShape("Parts_Analytics", () => shapeHelper.Parts_Analytics());
         }
+        #endregion
         #endregion
     }
 }
