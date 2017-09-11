@@ -1,6 +1,10 @@
-﻿@{ 
-    Layout.Title = T("Analytics"); 
+﻿@model Moov2.Orchard.Analytics.ViewModels.Admin.ByPageAnalyticsViewModel
+
+@{
+    Layout.Title = T("Analytics");
 }
+
+@Html.Partial("Shared/_Filters", Model)
 
 <fieldset>
     <table class="items">
@@ -11,7 +15,7 @@
             </tr>
         </thead>
         @foreach (var visit in Model.Entries)
-        {
+            {
             <tr>
                 <td>
                     @visit.Url

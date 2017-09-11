@@ -6,11 +6,11 @@ namespace Moov2.Orchard.Analytics.Core.Queries
 {
     public interface IAnalyticsQueries : IDependency
     {
-        IList<RawAnalyticsDto> GetAll(int skip, int take);
-        int GetAllCount();
-        IList<ByPageAnalyticsDto> GetByPage(int skip, int take);
-        int GetByPageCount();
-        IList<ByUserAnalyticsDto> GetByUser(int skip, int take);
-        int GetByUserCount();
+        IList<RawAnalyticsDto> GetAll(AnalyticsQueryModel query);
+        int GetAllCount(AnalyticsQueryModel query);
+        IList<ByPageAnalyticsDto> GetByPage(AnalyticsQueryModel query);
+        int GetByPageCount(AnalyticsQueryModel query);
+        IList<ByUserAnalyticsDto> GetByUser(AnalyticsQueryModel query);
+        int GetByUserCount(AnalyticsQueryModel query);
     }
 }

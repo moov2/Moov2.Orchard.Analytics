@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Moov2.Orchard.Analytics.ViewModels.Admin
 {
-    public class RawAnalyticsViewModel
+    public class RawAnalyticsViewModel : AnalyticsViewModel<RawAnalyticsDto>
     {
-        public IList<RawAnalyticsDto> Entries { get; set; }
-        public dynamic Pager { get; set; }
     }
 
     public class RawAnalyticsDto

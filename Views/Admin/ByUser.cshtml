@@ -1,6 +1,10 @@
-﻿@{
+﻿@model Moov2.Orchard.Analytics.ViewModels.Admin.ByUserAnalyticsViewModel
+
+@{
     Layout.Title = T("Analytics");
 }
+
+@Html.Partial("Shared/_Filters", Model)
 
 <fieldset>
     <table class="items">

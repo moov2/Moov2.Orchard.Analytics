@@ -1,12 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace Moov2.Orchard.Analytics.ViewModels.Admin
+﻿namespace Moov2.Orchard.Analytics.ViewModels.Admin
 {
-    public class ByPageAnalyticsViewModel
+    public class ByPageAnalyticsViewModel : AnalyticsViewModel<ByPageAnalyticsDto>
     {
-        public IList<ByPageAnalyticsDto> Entries { get; set; }
-
-        public dynamic Pager { get; set; }
     }
 
     public class ByPageAnalyticsDto
