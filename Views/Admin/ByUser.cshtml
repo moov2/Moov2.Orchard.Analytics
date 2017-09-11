@@ -1,0 +1,27 @@
+﻿@{
+    Layout.Title = T("Analytics");
+}
+
+<fieldset>
+    <table class="items">
+        <thead>
+            <tr>
+                <th scope="col">@T("User Identitifer")</th>
+                <th scope="col">@T("Visits")</th>
+            </tr>
+        </thead>
+        @foreach (var visit in Model.Entries)
+        {
+            <tr>
+                <td>
+                    @visit.User
+                </td>
+                <td>
+                    @visit.Count
+                </td>
+            </tr>
+        }
+    </table>
+</fieldset>
+
+@Display(Model.Pager)
