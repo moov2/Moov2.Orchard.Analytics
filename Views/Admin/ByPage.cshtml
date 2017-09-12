@@ -1,31 +1,31 @@
-﻿@model Moov2.Orchard.Analytics.ViewModels.Admin.ByPageAnalyticsViewModel
+﻿@model Moov2.Orchard.Analytics.ViewModels.Admin.AnalyticsViewModel<Moov2.Orchard.Analytics.ViewModels.Admin.Dto.SingleStatDto>
 
-@{
-    Layout.Title = T("Analytics");
-}
+    @{
+        Layout.Title = T("Analytics");
+    }
 
-@Html.Partial("Shared/_Filters", Model)
+    @Html.Partial("Shared/_Filters", Model)
 
-<fieldset>
-    <table class="items">
-        <thead>
-            <tr>
-                <th scope="col">@T("Page URL")</th>
-                <th scope="col">@T("Visits")</th>
-            </tr>
-        </thead>
-        @foreach (var visit in Model.Entries)
+    <fieldset>
+        <table class="items">
+            <thead>
+                <tr>
+                    <th scope="col">@T("Page URL")</th>
+                    <th scope="col">@T("Visits")</th>
+                </tr>
+            </thead>
+            @foreach (var visit in Model.Entries)
             {
-            <tr>
-                <td>
-                    @visit.Url
+                <tr>
+                    <td>
+                        @visit.Name
                 </td>
                 <td>
                     @visit.Count
                 </td>
             </tr>
-        }
-    </table>
-</fieldset>
+            }
+        </table>
+    </fieldset>
 
-@Display(Model.Pager)
+    @Display(Model.Pager)

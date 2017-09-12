@@ -1,11 +1,13 @@
 ﻿using Moov2.Orchard.Analytics.Models;
-using Moov2.Orchard.Analytics.ViewModels.Admin;
+using Moov2.Orchard.Analytics.ViewModels.Admin.Dto;
 using NHibernate.Linq;
 using Orchard.Data;
 using Orchard.Localization;
+using Orchard.Tags.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace Moov2.Orchard.Analytics.Core.Queries
 {
@@ -13,17 +15,19 @@ namespace Moov2.Orchard.Analytics.Core.Queries
     {
         #region Dependencies
         private readonly IRepository<AnalyticsEntry> _repository;
+        private readonly ITagService _tagService;
         private readonly ITransactionManager _transactionManager;
 
         public Localizer T { get; set; }
         #endregion
 
         #region Constructor
-        public AnalyticsQueries(IRepository<AnalyticsEntry> repository, ITransactionManager transactionManager)
+        public AnalyticsQueries(IRepository<AnalyticsEntry> repository, ITagService tagService, ITransactionManager transactionManager)
         {
             T = NullLocalizer.Instance;
 
             _repository = repository;
+            _tagService = tagService;
             _transactionManager = transactionManager;
         }
         #endregion
@@ -37,13 +41,21 @@ namespace Moov2.Orchard.Analytics.Core.Queries
                 .Skip(query.Skip);
             if (query.Take > 0)
                 queryable = queryable.Take(query.Take);
-            return queryable
+            var items = queryable
                 .Select(x => new RawAnalyticsDto
                 {
+                    Tags = x.Tags,
                     UserIdentifier = !string.IsNullOrWhiteSpace(x.UserIdentifier) ? x.UserIdentifier : T("Anonymous").ToString(),
                     Url = x.Url,
                     VisitDate = x.VisitDateUtc.ToLocalTime()
                 }).ToList();
+            foreach (var item in items)
+            {
+                var tags = (item.Tags ?? "").Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                Array.Sort(tags);
+                item.Tags = string.Join(", ", tags);
+            }
+            return items;
         }
 
         public int GetAllCount(AnalyticsQueryModel query)
@@ -61,28 +73,34 @@ namespace Moov2.Orchard.Analytics.Core.Queries
         /// <param name="skip">Index of row to return from.</param>
         /// <param name="take">Number of rows to take.</param>
         /// <returns>List of page URLs with their view count.</returns>
-        public IList<ByPageAnalyticsDto> GetByPage(AnalyticsQueryModel query)
+        public IList<SingleStatDto> GetByPage(AnalyticsQueryModel query)
         {
-            var queryable = GetQueryable();
-            queryable = ApplyDateFilter(queryable, query.FromUtc, query.ToUtc);
-            var dtoQueryable = queryable.GroupBy(x => x.Url)
-                .OrderByDescending(x => x.Count())
-                .Select(x => new ByPageAnalyticsDto
-                {
-                    Url = x.Key,
-                    Count = x.Count()
-                })
-                .Skip(query.Skip);
-            if (query.Take > 0)
-                dtoQueryable = dtoQueryable.Take(query.Take);
-            return dtoQueryable.ToList();
+            return GetGroupByItems(query, x => x.Url);
         }
 
         public int GetByPageCount(AnalyticsQueryModel query)
         {
-            var queryable = GetQueryable();
-            queryable = ApplyDateFilter(queryable, query.FromUtc, query.ToUtc);
-            return queryable.Select(x => x.Url).Distinct().Count();
+            return GetGroupByCount(query, x => x.Url);
+        }
+
+        public IList<SingleStatDto> GetByTag(AnalyticsQueryModel query)
+        {
+            var tags = _tagService.GetTags().Select(x => new SingleStatDto { Name = x.TagName }).ToList();
+            foreach (var tag in tags)
+            {
+                var queryable = GetQueryable();
+                queryable = ApplyDateFilter(queryable, query.FromUtc, query.ToUtc);
+                tag.Count = queryable.Where(x => x.Tags.Contains(tag.Name)).Count();
+            }
+            return tags.OrderByDescending(x => x.Count)
+                .Skip(query.Skip)
+                .Take(query.Take)
+                .ToList();
+        }
+
+        public int GetByTagCount(AnalyticsQueryModel query)
+        {
+            return _tagService.GetTags().Count();
         }
 
         /// <summary>
@@ -92,28 +110,14 @@ namespace Moov2.Orchard.Analytics.Core.Queries
         /// <param name="from">Index of row to return from.</param>
         /// <param name="to">Index of row to return up to.</param>
         /// <returns>List of UserIdentifiers with their view count.</returns>
-        public IList<ByUserAnalyticsDto> GetByUser(AnalyticsQueryModel query)
+        public IList<SingleStatDto> GetByUser(AnalyticsQueryModel query)
         {
-            var queryable = GetQueryable();
-            queryable = ApplyDateFilter(queryable, query.FromUtc, query.ToUtc);
-            var dtoQueryable = queryable.GroupBy(x => x.UserIdentifier)
-            .OrderByDescending(x => x.Count())
-            .Select(x => new ByUserAnalyticsDto
-            {
-                User = x.Key,
-                Count = x.Count()
-            })
-            .Skip(query.Skip);
-            if (query.Take > 0)
-                dtoQueryable = dtoQueryable.Take(query.Take);
-            return dtoQueryable.ToList();
+            return GetGroupByItems(query, x => x.UserIdentifier);
         }
 
         public int GetByUserCount(AnalyticsQueryModel query)
         {
-            var queryable = GetQueryable();
-            queryable = ApplyDateFilter(queryable, query.FromUtc, query.ToUtc);
-            return queryable.Select(x => x.UserIdentifier).Distinct().Count();
+            return GetGroupByCount(query, x => x.UserIdentifier);
         }
 
         #endregion
@@ -126,6 +130,35 @@ namespace Moov2.Orchard.Analytics.Core.Queries
             if (toUtc.HasValue)
                 queryable = queryable.Where(x => toUtc > x.VisitDateUtc);
             return queryable;
+        }
+
+        private IQueryable<SingleStatDto> GetGroupBy(AnalyticsQueryModel query, Expression<Func<AnalyticsEntry, string>> groupSelector)
+        {
+            var queryable = GetQueryable();
+            queryable = ApplyDateFilter(queryable, query.FromUtc, query.ToUtc);
+            return queryable.GroupBy(groupSelector)
+                .OrderByDescending(x => x.Count())
+                .Select(x => new SingleStatDto
+                {
+                    Name = x.Key,
+                    Count = x.Count()
+                });
+        }
+
+        private int GetGroupByCount(AnalyticsQueryModel query, Expression<Func<AnalyticsEntry, string>> groupSelector)
+        {
+            var queryable = GetQueryable();
+            queryable = ApplyDateFilter(queryable, query.FromUtc, query.ToUtc);
+            return queryable.Select(groupSelector).Distinct().Count();
+        }
+
+        private IList<SingleStatDto> GetGroupByItems(AnalyticsQueryModel query, Expression<Func<AnalyticsEntry, string>> groupSelector)
+        {
+            var queryable = GetGroupBy(query, groupSelector)
+                .Skip(query.Skip);
+            if (query.Take > 0)
+                queryable = queryable.Take(query.Take);
+            return queryable.ToList();
         }
 
         private IQueryable<AnalyticsEntry> GetQueryable()

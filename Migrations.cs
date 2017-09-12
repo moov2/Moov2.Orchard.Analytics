@@ -12,6 +12,8 @@ namespace Moov2.Orchard.Analytics
             SchemaBuilder.CreateTable("AnalyticsEntry",
                 table => table
                     .Column<int>("Id", c => c.Identity().PrimaryKey())
+                    .Column<int>("ContentItemId")
+                    .Column<string>("Tags", c => c.WithLength(int.MaxValue))
                     .Column<string>("UserIdentifier")
                     .Column<string>("Url")
                     .Column<DateTime>("VisitDateUtc", c => c.NotNull())
@@ -28,7 +30,22 @@ namespace Moov2.Orchard.Analytics
                 .WithSetting("Stereotype", "Widget")
             );
 
-            return 1;
+            return 2;
+        }
+
+        public int UpdateFrom1()
+        {
+            SchemaBuilder.AlterTable("AnalyticsEntry",
+                table => table
+                    .AddColumn<int>("ContentItemId")
+            );
+
+            SchemaBuilder.AlterTable("AnalyticsEntry",
+                table => table
+                    .AddColumn<string>("Tags", c => c.WithLength(int.MaxValue))
+            );
+
+            return 2;
         }
     }
 }

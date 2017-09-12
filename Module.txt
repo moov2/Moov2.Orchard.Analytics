@@ -12,3 +12,8 @@ Features:
         Category: Analytics
         Description: Adds analytics based on user page views.
         Dependencies: Orchard.Widgets
+    Moov2.Orchard.Analytics.Tags:
+        Name: Analytics Tags
+        Category: Analytics
+        Description: Adds tags to the analytics.
+        Dependencies: Moov2.Orchard.Analytics, Orchard.Tags

@@ -1,5 +1,7 @@
 ﻿using Moov2.Orchard.Analytics.Core.Queries;
+using Moov2.Orchard.Analytics.Core.Settings;
 using Moov2.Orchard.Analytics.ViewModels.Admin;
+using Moov2.Orchard.Analytics.ViewModels.Admin.Dto;
 using Orchard.Core.Common.ViewModels;
 using Orchard.DisplayManagement;
 using Orchard.Localization;
@@ -18,6 +20,7 @@ namespace Moov2.Orchard.Analytics.Controllers
     {
         #region Dependencies
         private readonly IAnalyticsQueries _analyticsQueries;
+        private readonly IAnalyticsSettings _analyticsSettings;
         private readonly IAuthorizer _authorizer;
         private readonly dynamic _shape;
         private readonly ISiteService _siteService;
@@ -26,11 +29,12 @@ namespace Moov2.Orchard.Analytics.Controllers
         #endregion
 
         #region Constructor
-        public AdminController(IAnalyticsQueries analyticsQueries, IAuthorizer authorizer, IShapeFactory shapeFactory, ISiteService siteService)
+        public AdminController(IAnalyticsQueries analyticsQueries, IAnalyticsSettings analyticsSettings, IAuthorizer authorizer, IShapeFactory shapeFactory, ISiteService siteService)
         {
             T = NullLocalizer.Instance;
 
             _analyticsQueries = analyticsQueries;
+            _analyticsSettings = analyticsSettings;
             _authorizer = authorizer;
             _shape = shapeFactory;
             _siteService = siteService;
@@ -38,19 +42,26 @@ namespace Moov2.Orchard.Analytics.Controllers
         #endregion
 
         #region Actions
-        public ActionResult Index(PagerParameters pagerParameters, RawAnalyticsViewModel model)
+        public ActionResult Index(PagerParameters pagerParameters, AnalyticsViewModel<RawAnalyticsDto> model)
         {
             return View(GetAnalyticsResults(pagerParameters, model, query => _analyticsQueries.GetAllCount(query), query => _analyticsQueries.GetAll(query)));
         }
 
-        public ActionResult ByPage(PagerParameters pagerParameters, ByPageAnalyticsViewModel model)
+        public ActionResult ByPage(PagerParameters pagerParameters, AnalyticsViewModel<SingleStatDto> model)
         {
             return View(GetAnalyticsResults(pagerParameters, model, query => _analyticsQueries.GetByPageCount(query), query => _analyticsQueries.GetByPage(query)));
         }
 
-        public ActionResult ByUser(PagerParameters pagerParameters, ByUserAnalyticsViewModel model)
+        public ActionResult ByUser(PagerParameters pagerParameters, AnalyticsViewModel<SingleStatDto> model)
         {
             return View(GetAnalyticsResults(pagerParameters, model, query => _analyticsQueries.GetByUserCount(query), query => _analyticsQueries.GetByUser(query)));
+        }
+
+        public ActionResult ByTag(PagerParameters pagerParameters, AnalyticsViewModel<SingleStatDto> model)
+        {
+            if (!_analyticsSettings.TagsEnabled)
+                return HttpNotFound();
+            return View(GetAnalyticsResults(pagerParameters, model, x => _analyticsQueries.GetByTagCount(x), x => _analyticsQueries.GetByTag(x)));
         }
         #endregion
 
@@ -78,6 +89,7 @@ namespace Moov2.Orchard.Analytics.Controllers
 
             model.Entries = entries(queryModel);
             model.Pager = pagerShape;
+            model.TagsEnabled = _analyticsSettings.TagsEnabled;
             return model;
         }
 

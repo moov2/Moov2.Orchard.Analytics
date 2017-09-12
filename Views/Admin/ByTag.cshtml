@@ -10,7 +10,7 @@
     <table class="items">
         <thead>
             <tr>
-                <th scope="col">@T("User Identitifer")</th>
+                <th scope="col">@T("Tag")</th>
                 <th scope="col">@T("Visits")</th>
             </tr>
         </thead>
@@ -18,7 +18,7 @@
         {
             <tr>
                 <td>
-                    @(!string.IsNullOrWhiteSpace(visit.Name) ? visit.Name : T("Anonymous").ToString())
+                    @visit.Name
                 </td>
                 <td>
                     @visit.Count

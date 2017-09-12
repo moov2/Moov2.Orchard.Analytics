@@ -1,4 +1,4 @@
-﻿@model Moov2.Orchard.Analytics.ViewModels.Admin.RawAnalyticsViewModel
+﻿@model Moov2.Orchard.Analytics.ViewModels.Admin.AnalyticsViewModel<Moov2.Orchard.Analytics.ViewModels.Admin.Dto.RawAnalyticsDto>
 
 @{ 
     Layout.Title = T("Analytics"); 
@@ -12,6 +12,10 @@
             <tr>
                 <th scope="col">@T("User Identifier")</th>
                 <th scope="col">@T("Page URL")</th>
+                @if (Model.TagsEnabled)
+                {
+                    <th scope="col">@T("Tags")</th>
+                }
                 <th scope="col">@T("Visit Date")</th>
             </tr>
         </thead>
@@ -24,6 +28,11 @@
                 <td>
                     @visit.Url
                 </td>
+                @if (Model.TagsEnabled) { 
+                    <td>
+                        @visit.Tags
+                    </td>
+                }
                 <td>
                     @visit.VisitDate
                 </td>

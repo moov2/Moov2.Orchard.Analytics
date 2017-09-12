@@ -3,6 +3,10 @@
         return $('.js-analytics--anti-forgery').html();
     }
 
+    var getContentItemId = function () {
+        return $('.js-analytics--content-item-id').html();
+    };
+
     var cleanUrl = function (url) {
         return url.replace(window.location.protocol + '//', '').replace(window.location.hostname, '').replace(':' + window.location.port, '');
     };
@@ -13,7 +17,8 @@
 
     var getData = function () {
         var data = '__RequestVerificationToken=' + encodeURIComponent(getAntiForgery()) +
-            '&Url=' + encodeURIComponent(getUrl());
+            '&Url=' + encodeURIComponent(getUrl()) +
+            '&ContentItemId=' + encodeURIComponent(getContentItemId());
         return data;
     };
 
