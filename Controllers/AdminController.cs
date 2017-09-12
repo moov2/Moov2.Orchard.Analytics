@@ -105,6 +105,7 @@ namespace Moov2.Orchard.Analytics.Controllers
                 query.FromUtc = parsed.ToUniversalTime();
             if (!string.IsNullOrWhiteSpace(model.To.Date) && DateTime.TryParse(model.To.Date, out parsed))
                 query.ToUtc = parsed.ToUniversalTime();
+            query.Term = model.Term;
             return query;
         }
         #endregion

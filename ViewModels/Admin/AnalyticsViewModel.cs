@@ -21,5 +21,7 @@ namespace Moov2.Orchard.Analytics.ViewModels.Admin
         public dynamic Pager { get; set; }
 
         public bool TagsEnabled { get; set; }
+
+        public string Term { get; set; }
     }
 }

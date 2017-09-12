@@ -1,4 +1,5 @@
-﻿using Moov2.Orchard.Analytics.Models;
+﻿using Moov2.Orchard.Analytics.Core.Settings;
+using Moov2.Orchard.Analytics.Models;
 using Moov2.Orchard.Analytics.ViewModels.Admin.Dto;
 using NHibernate.Linq;
 using Orchard.Data;
@@ -14,6 +15,7 @@ namespace Moov2.Orchard.Analytics.Core.Queries
     public class AnalyticsQueries : IAnalyticsQueries
     {
         #region Dependencies
+        private readonly IAnalyticsSettings _analyticsSettings;
         private readonly IRepository<AnalyticsEntry> _repository;
         private readonly ITagService _tagService;
         private readonly ITransactionManager _transactionManager;
@@ -22,10 +24,11 @@ namespace Moov2.Orchard.Analytics.Core.Queries
         #endregion
 
         #region Constructor
-        public AnalyticsQueries(IRepository<AnalyticsEntry> repository, ITagService tagService, ITransactionManager transactionManager)
+        public AnalyticsQueries(IAnalyticsSettings analyticsSettings, IRepository<AnalyticsEntry> repository, ITagService tagService, ITransactionManager transactionManager)
         {
             T = NullLocalizer.Instance;
 
+            _analyticsSettings = analyticsSettings;
             _repository = repository;
             _tagService = tagService;
             _transactionManager = transactionManager;
@@ -36,7 +39,7 @@ namespace Moov2.Orchard.Analytics.Core.Queries
         public IList<RawAnalyticsDto> GetAll(AnalyticsQueryModel query)
         {
             var queryable = GetQueryable();
-            queryable = ApplyDateFilter(queryable, query.FromUtc, query.ToUtc);
+            queryable = ApplyFilters(queryable, query);
             queryable = queryable.OrderByDescending(x => x.VisitDateUtc)
                 .Skip(query.Skip);
             if (query.Take > 0)
@@ -61,7 +64,7 @@ namespace Moov2.Orchard.Analytics.Core.Queries
         public int GetAllCount(AnalyticsQueryModel query)
         {
             var queryable = GetQueryable();
-            queryable = ApplyDateFilter(queryable, query.FromUtc, query.ToUtc);
+            queryable = ApplyFilters(queryable, query);
             return queryable.Count();
         }
 
@@ -89,7 +92,7 @@ namespace Moov2.Orchard.Analytics.Core.Queries
             foreach (var tag in tags)
             {
                 var queryable = GetQueryable();
-                queryable = ApplyDateFilter(queryable, query.FromUtc, query.ToUtc);
+                queryable = ApplyFilters(queryable, query);
                 tag.Count = queryable.Where(x => x.Tags.Contains(tag.Name)).Count();
             }
             return tags.OrderByDescending(x => x.Count)
@@ -123,6 +126,13 @@ namespace Moov2.Orchard.Analytics.Core.Queries
         #endregion
 
         #region Helpers
+        private IQueryable<AnalyticsEntry> ApplyFilters(IQueryable<AnalyticsEntry> queryable, AnalyticsQueryModel query)
+        {
+            queryable = ApplyDateFilter(queryable, query.FromUtc, query.ToUtc);
+            queryable = ApplyTermFilter(queryable, query.Term);
+            return queryable;
+        }
+
         private IQueryable<AnalyticsEntry> ApplyDateFilter(IQueryable<AnalyticsEntry> queryable, DateTime? fromUtc, DateTime? toUtc)
         {
             if (fromUtc.HasValue)
@@ -132,10 +142,21 @@ namespace Moov2.Orchard.Analytics.Core.Queries
             return queryable;
         }
 
+        private IQueryable<AnalyticsEntry> ApplyTermFilter(IQueryable<AnalyticsEntry> queryable, string term)
+        {
+            if (string.IsNullOrWhiteSpace(term))
+                return queryable;
+            return queryable.Where(x =>
+               x.UserIdentifier.Contains(term) ||
+               x.Url.Contains(term) ||
+               (_analyticsSettings.TagsEnabled && x.Tags.Contains(term))
+            );
+        }
+
         private IQueryable<SingleStatDto> GetGroupBy(AnalyticsQueryModel query, Expression<Func<AnalyticsEntry, string>> groupSelector)
         {
             var queryable = GetQueryable();
-            queryable = ApplyDateFilter(queryable, query.FromUtc, query.ToUtc);
+            queryable = ApplyFilters(queryable, query);
             return queryable.GroupBy(groupSelector)
                 .OrderByDescending(x => x.Count())
                 .Select(x => new SingleStatDto
@@ -148,7 +169,7 @@ namespace Moov2.Orchard.Analytics.Core.Queries
         private int GetGroupByCount(AnalyticsQueryModel query, Expression<Func<AnalyticsEntry, string>> groupSelector)
         {
             var queryable = GetQueryable();
-            queryable = ApplyDateFilter(queryable, query.FromUtc, query.ToUtc);
+            queryable = ApplyFilters(queryable, query);
             return queryable.Select(groupSelector).Distinct().Count();
         }
 

@@ -2,6 +2,10 @@
 
 <form method="get" class="inline">
     <fieldset>
+        @Html.LabelFor(m => m.Term, T("Term"))
+        @Html.EditorFor(m => m.Term)
+    </fieldset>
+    <fieldset>
         @Html.LabelFor(m => m.From, T("From"))
         @Html.EditorFor(m => m.From)
     </fieldset>
