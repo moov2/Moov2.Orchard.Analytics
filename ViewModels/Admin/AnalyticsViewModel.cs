@@ -12,8 +12,11 @@ namespace Moov2.Orchard.Analytics.ViewModels.Admin
     {
         public AnalyticsViewModel()
         {
+            DownloadCsv = false;
             TagsEnabled = false;
         }
+
+        public bool DownloadCsv { get; set; }
 
         public DateTimeEditor From { get; set; }
         public DateTimeEditor To { get; set; }

@@ -95,10 +95,11 @@ namespace Moov2.Orchard.Analytics.Core.Queries
                 queryable = ApplyFilters(queryable, query);
                 tag.Count = queryable.Where(x => x.Tags.Contains(tag.Name)).Count();
             }
-            return tags.OrderByDescending(x => x.Count)
-                .Skip(query.Skip)
-                .Take(query.Take)
-                .ToList();
+            var result = tags.OrderByDescending(x => x.Count)
+                .Skip(query.Skip);
+            if (query.Take > 0)
+                result = result.Take(query.Take);
+            return result.ToList();
         }
 
         public int GetByTagCount(AnalyticsQueryModel query)
