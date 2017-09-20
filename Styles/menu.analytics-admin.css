@@ -1,0 +1,7 @@
+﻿.navicon-analytics {
+    background-image:url(images/menu.analytics.png) !important;
+}
+
+.navicon-analytics:hover {
+    background-position: 0 -30px !important;
+}

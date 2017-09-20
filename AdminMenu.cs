@@ -33,7 +33,8 @@ namespace Moov2.Orchard.Analytics
             if (!Services.Authorizer.Authorize(Permissions.ViewAnalytics))
                 return;
 
-            builder.Add(T("Analytics"), "9", menu =>
+            builder.AddImageSet("analytics")
+                .Add(T("Analytics"), "9", menu =>
                 {
                     var action = menu.Action("Index", "Admin", new { area = "Moov2.Orchard.Analytics" })
                         .Add(T("Raw"), "0", item => item.Action("Index", "Admin", new { area = "Moov2.Orchard.Analytics" }).LocalNav())

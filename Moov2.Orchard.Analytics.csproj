@@ -25,6 +25,7 @@
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
+    <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -131,6 +132,8 @@
     <Content Include="Scripts\analytics.min.js" />
     <Content Include="Styles\analytics.css" />
     <Content Include="Styles\analytics.min.css" />
+    <Content Include="Styles\images\menu.analytics.png" />
+    <Content Include="Styles\menu.analytics-admin.css" />
     <Content Include="Web.config" />
     <Content Include="Module.txt" />
   </ItemGroup>
