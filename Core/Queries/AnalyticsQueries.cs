@@ -15,24 +15,27 @@ namespace Moov2.Orchard.Analytics.Core.Queries
     public class AnalyticsQueries : IAnalyticsQueries
     {
         #region Dependencies
+
         private readonly IAnalyticsSettings _analyticsSettings;
         private readonly IRepository<AnalyticsEntry> _repository;
-        private readonly ITagService _tagService;
         private readonly ITransactionManager _transactionManager;
 
         public Localizer T { get; set; }
+        public ITagService TagService { get; set; }
+
         #endregion
 
         #region Constructor
-        public AnalyticsQueries(IAnalyticsSettings analyticsSettings, IRepository<AnalyticsEntry> repository, ITagService tagService, ITransactionManager transactionManager)
+
+        public AnalyticsQueries(IAnalyticsSettings analyticsSettings, IRepository<AnalyticsEntry> repository, ITransactionManager transactionManager)
         {
             T = NullLocalizer.Instance;
 
             _analyticsSettings = analyticsSettings;
             _repository = repository;
-            _tagService = tagService;
             _transactionManager = transactionManager;
         }
+
         #endregion
 
         #region IAnalyticsQueries
@@ -68,7 +71,6 @@ namespace Moov2.Orchard.Analytics.Core.Queries
             return queryable.Count();
         }
 
-
         /// <summary>
         /// Returns a list of unqiue page URLs with the number of times they have been
         /// visited by a user.
@@ -88,7 +90,10 @@ namespace Moov2.Orchard.Analytics.Core.Queries
 
         public IList<SingleStatDto> GetByTag(AnalyticsQueryModel query)
         {
-            var tags = _tagService.GetTags().Select(x => new SingleStatDto { Name = x.TagName }).ToList();
+            if (TagService == null)
+                throw (new Exception("Must enable Orchard.Tags"));
+
+            var tags = TagService.GetTags().Select(x => new SingleStatDto { Name = x.TagName }).ToList();
             foreach (var tag in tags)
             {
                 var queryable = GetQueryable();
@@ -104,7 +109,10 @@ namespace Moov2.Orchard.Analytics.Core.Queries
 
         public int GetByTagCount(AnalyticsQueryModel query)
         {
-            return _tagService.GetTags().Count();
+            if (TagService == null)
+                throw (new Exception("Must enable Orchard.Tags"));
+
+            return TagService.GetTags().Count();
         }
 
         /// <summary>
@@ -187,6 +195,7 @@ namespace Moov2.Orchard.Analytics.Core.Queries
         {
             return _transactionManager.GetSession().Query<AnalyticsEntry>();
         }
+
         #endregion
     }
 }
