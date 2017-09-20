@@ -1,18 +1,21 @@
 ﻿@model Moov2.Orchard.Analytics.ViewModels.Admin.AnalyticsViewModel
 
-<form method="get" class="inline">
-    <fieldset>
-        @Html.LabelFor(m => m.Term, T("Term"))
-        @Html.EditorFor(m => m.Term)
-    </fieldset>
-    <fieldset>
-        @Html.LabelFor(m => m.From, T("From"))
-        @Html.EditorFor(m => m.From)
-    </fieldset>
-    <fieldset>
-        @Html.LabelFor(m => m.To, T("To"))
-        @Html.EditorFor(m => m.To)
-    </fieldset>
-    <button class="primaryAction">@T("Go")</button>
-    <button class="primaryAction" name="DownloadCsv" value="true">@T("Download CSV")</button>
-</form>
+<div style="margin-bottom: 10px;">
+    <form method="get" class="inline">
+        <fieldset style="margin-right: 6px;">
+            @Html.LabelFor(m => m.Term, T("Term"))
+            @Html.EditorFor(m => m.Term)
+        </fieldset>
+        <fieldset style="margin-right: 6px;">
+            @Html.LabelFor(m => m.From, T("From"))
+            @Html.EditorFor(m => m.From)
+        </fieldset>
+        <fieldset style="margin-right: 6px;">
+            @Html.LabelFor(m => m.To, T("To"))
+            @Html.EditorFor(m => m.To)
+        </fieldset>
+        <button class="primaryAction">@T("Filter")</button>
+        <span style="display: inline-block; padding: 0 8px;"> | </span>
+        <button class="primaryAction" name="DownloadCsv" value="true">@T("Download CSV")</button>
+    </form>
+</div>
