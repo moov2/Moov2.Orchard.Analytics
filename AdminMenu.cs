@@ -32,12 +32,14 @@ namespace Moov2.Orchard.Analytics
         {
             if (!Services.Authorizer.Authorize(Permissions.ViewAnalytics))
                 return;
+
             builder.Add(T("Analytics"), "9", menu =>
                 {
                     var action = menu.Action("Index", "Admin", new { area = "Moov2.Orchard.Analytics" })
                         .Add(T("Raw"), "0", item => item.Action("Index", "Admin", new { area = "Moov2.Orchard.Analytics" }).LocalNav())
                         .Add(T("By Page"), "1", item => item.Action("ByPage", "Admin", new { area = "Moov2.Orchard.Analytics" }).LocalNav())
                         .Add(T("By User"), "2", item => item.Action("ByUser", "Admin", new { area = "Moov2.Orchard.Analytics" }).LocalNav());
+
                     if (_analyticsSettings.TagsEnabled)
                         action.Add(T("By Tag"), "3", item => item.Action("ByTag", "Admin", new { area = "Moov2.Orchard.Analytics" }).LocalNav());
                 });
