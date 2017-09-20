@@ -18,14 +18,20 @@ namespace Moov2.Orchard.Analytics.Core.Queries
 
         private readonly IAnalyticsSettings _analyticsSettings;
         private readonly IRepository<AnalyticsEntry> _repository;
+        private readonly ITagService _tagService;
         private readonly ITransactionManager _transactionManager;
 
         public Localizer T { get; set; }
-        public ITagService TagService { get; set; }
 
         #endregion
 
         #region Constructor
+
+        public AnalyticsQueries(IAnalyticsSettings analyticsSettings, IRepository<AnalyticsEntry> repository, ITagService tagService, ITransactionManager transactionManager)
+            : this(analyticsSettings, repository, transactionManager)
+        {
+            _tagService = tagService;
+        }
 
         public AnalyticsQueries(IAnalyticsSettings analyticsSettings, IRepository<AnalyticsEntry> repository, ITransactionManager transactionManager)
         {
@@ -90,10 +96,10 @@ namespace Moov2.Orchard.Analytics.Core.Queries
 
         public IList<SingleStatDto> GetByTag(AnalyticsQueryModel query)
         {
-            if (TagService == null)
+            if (_tagService == null)
                 throw (new Exception("Must enable Orchard.Tags"));
 
-            var tags = TagService.GetTags().Select(x => new SingleStatDto { Name = x.TagName }).ToList();
+            var tags = _tagService.GetTags().Select(x => new SingleStatDto { Name = x.TagName }).ToList();
             foreach (var tag in tags)
             {
                 var queryable = GetQueryable();
@@ -109,10 +115,10 @@ namespace Moov2.Orchard.Analytics.Core.Queries
 
         public int GetByTagCount(AnalyticsQueryModel query)
         {
-            if (TagService == null)
+            if (_tagService == null)
                 throw (new Exception("Must enable Orchard.Tags"));
 
-            return TagService.GetTags().Count();
+            return _tagService.GetTags().Count();
         }
 
         /// <summary>
